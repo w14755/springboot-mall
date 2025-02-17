@@ -1,29 +1,22 @@
-package com.eder.springbootmall.model;
-
+package com.eder.springbootmall.dto;
 
 import com.eder.springbootmall.constant.ProductCategory;
 
-import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
 
-public class Product {
+public class ProductReq {
 
-    private Integer productId;
+    @NotNull
     private String productName;
+    @NotNull
     private ProductCategory category;
+    @NotNull
     private String imageUrl;
+    @NotNull
     private Integer price;
+    @NotNull
     private Integer stock;
     private String description;
-    private LocalDateTime createdDate;
-    private LocalDateTime lastModifiedDate;
-
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
 
     public String getProductName() {
         return productName;
@@ -71,21 +64,5 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public LocalDateTime getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
     }
 }
