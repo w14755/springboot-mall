@@ -1,5 +1,6 @@
 package com.eder.springbootmall.dao.impl;
 
+import com.eder.springbootmall.constant.ProductCategory;
 import com.eder.springbootmall.dao.ProductDao;
 import com.eder.springbootmall.dto.ProductReq;
 import com.eder.springbootmall.model.Product;
@@ -23,50 +24,61 @@ public class ProductDaoImpl implements ProductDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public List<Product> getProducts() {
-        String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date FROM product";
-        List<Product> productList = namedParameterJdbcTemplate.query(sql, new HashMap<>(), new ProductRowMapper());
-        return productList;
+    public List<Product> getProducts(ProductCategory category, String searchKeyword) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date" +
+                " FROM product WHERE 1 = 1");
+
+        Map<String, Object> parameterMap = new HashMap<>();
+
+        if (category != null) {
+            // AND前需要加上空白，避免在組SQL的時候黏住
+            sql.append(" AND category = :category");
+            parameterMap.put("category", category.name());
+        }
+
+        if (searchKeyword != null) {
+            sql.append(" AND product_name LIKE :searchKeyword");
+            parameterMap.put("searchKeyword", "%" + searchKeyword + "%");
+        }
+
+        return namedParameterJdbcTemplate.query(sql.toString(), parameterMap, new ProductRowMapper());
     }
 
     @Override
     public Product getProductById(Integer productId) {
-        String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date " +
-                "FROM product WHERE product_id = :productId";
+        String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date "
+                + "FROM product WHERE product_id = :productId";
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("productId", productId);
+        Map<String, Object> parameterMap = new HashMap<>();
+        parameterMap.put("productId", productId);
 
-        List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
-
-        if(productList.size() > 0) {
-            return productList.get(0);
-        }else {
-            return null;
-        }
+        List<Product> results = namedParameterJdbcTemplate.query(sql, parameterMap, new ProductRowMapper());
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public Integer createProduct(ProductReq req) {
-        String sql = "INSERT INTO product (product_name, category, image_url, price, stock, description, created_date, last_modified_date)" +
-                "VALUES (:productName, :category, :imageUrl, :price, :stock, :description, :createdDate, :lastModifiedDate)";
+        String sql = "INSERT INTO product (product_name, category, image_url, price, stock, description, created_date, last_modified_date)"
+                + " VALUES (:productName, :category, :imageUrl, :price, :stock, :description, :createdDate, :lastModifiedDate)";
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("productName", req.getProductName());
-        map.put("category", req.getCategory().name());
-        map.put("imageUrl", req.getImageUrl());
-        map.put("price", req.getPrice());
-        map.put("stock", req.getStock());
-        map.put("description", req.getDescription());
-        map.put("createdDate", LocalDateTime.now());
-        map.put("lastModifiedDate",  LocalDateTime.now());
+        Map<String, Object> params = new HashMap<>();
+        params.put("productName", req.getProductName());
+        params.put("category", req.getCategory().name());
+        params.put("imageUrl", req.getImageUrl());
+        params.put("price", req.getPrice());
+        params.put("stock", req.getStock());
+        params.put("description", req.getDescription());
+        params.put("createdDate", LocalDateTime.now());
+        params.put("lastModifiedDate", LocalDateTime.now());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
+        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(params), keyHolder);
 
         return keyHolder.getKey().intValue();
     }
+
+    // Improved by standardizing variable names, removing debugging statements, and improving readability.
 
     @Override
     public void updateProduct(Integer productId, ProductReq req) {
