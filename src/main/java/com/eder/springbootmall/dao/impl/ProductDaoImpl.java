@@ -2,6 +2,7 @@ package com.eder.springbootmall.dao.impl;
 
 import com.eder.springbootmall.constant.ProductCategory;
 import com.eder.springbootmall.dao.ProductDao;
+import com.eder.springbootmall.dto.ProductQueryParams;
 import com.eder.springbootmall.dto.ProductReq;
 import com.eder.springbootmall.model.Product;
 import com.eder.springbootmall.rowmapper.ProductRowMapper;
@@ -24,24 +25,25 @@ public class ProductDaoImpl implements ProductDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public List<Product> getProducts(ProductCategory category, String searchKeyword) {
+    public List<Product> getProducts(ProductQueryParams productQueryParams) {
         StringBuilder sql = new StringBuilder(
                 "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date" +
                 " FROM product WHERE 1 = 1");
 
         Map<String, Object> parameterMap = new HashMap<>();
 
-        if (category != null) {
+        if (productQueryParams.getCategory() != null) {
             // AND前需要加上空白，避免在組SQL的時候黏住
             sql.append(" AND category = :category");
-            parameterMap.put("category", category.name());
+            parameterMap.put("category", productQueryParams.getCategory().name());
         }
 
-        if (searchKeyword != null) {
-            sql.append(" AND product_name LIKE :searchKeyword");
-            parameterMap.put("searchKeyword", "%" + searchKeyword + "%");
+        if (productQueryParams.getSearch() != null) {
+            sql.append(" AND product_name LIKE :search");
+            parameterMap.put("search", "%" + productQueryParams.getSearch() + "%");
         }
 
+        sql.append(" ORDER BY ").append(productQueryParams.getOrderBy()).append(" ").append(productQueryParams.getSort());
         return namedParameterJdbcTemplate.query(sql.toString(), parameterMap, new ProductRowMapper());
     }
 
