@@ -1,6 +1,5 @@
 package com.eder.springbootmall.dao.impl;
 
-import com.eder.springbootmall.constant.ProductCategory;
 import com.eder.springbootmall.dao.ProductDao;
 import com.eder.springbootmall.dto.ProductQueryParams;
 import com.eder.springbootmall.dto.ProductReq;
@@ -32,6 +31,7 @@ public class ProductDaoImpl implements ProductDao {
 
         Map<String, Object> parameterMap = new HashMap<>();
 
+        // 查詢條件
         if (productQueryParams.getCategory() != null) {
             // AND前需要加上空白，避免在組SQL的時候黏住
             sql.append(" AND category = :category");
@@ -43,7 +43,14 @@ public class ProductDaoImpl implements ProductDao {
             parameterMap.put("search", "%" + productQueryParams.getSearch() + "%");
         }
 
+        // 排序
         sql.append(" ORDER BY ").append(productQueryParams.getOrderBy()).append(" ").append(productQueryParams.getSort());
+
+        // 分頁
+        sql.append(" LIMIT :limit OFFSET :offset");
+        parameterMap.put("limit", productQueryParams.getLimit());
+        parameterMap.put("offset", productQueryParams.getOffset());
+
         return namedParameterJdbcTemplate.query(sql.toString(), parameterMap, new ProductRowMapper());
     }
 

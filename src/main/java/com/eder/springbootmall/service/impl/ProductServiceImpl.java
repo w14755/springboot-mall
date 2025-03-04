@@ -1,6 +1,5 @@
 package com.eder.springbootmall.service.impl;
 
-import com.eder.springbootmall.constant.ProductCategory;
 import com.eder.springbootmall.dao.ProductDao;
 import com.eder.springbootmall.dto.ProductQueryParams;
 import com.eder.springbootmall.dto.ProductReq;

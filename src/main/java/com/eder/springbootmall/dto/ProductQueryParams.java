@@ -6,8 +6,22 @@ public class ProductQueryParams {
 
     private ProductCategory category;
     private String search;
-    private String orderBy;
-    private String sort;
+    private String orderBy = "created_date";
+    private String sort = "desc";
+    private Integer limit;
+    private Integer offset;
+
+    public ProductQueryParams() {
+    }
+
+    public ProductQueryParams(ProductCategory category, String search, String orderBy, String sort, Integer limit, Integer offset) {
+        this.category = category;
+        this.search = search;
+        this.orderBy = orderBy;
+        this.sort = sort;
+        this.limit = limit;
+        this.offset = offset;
+    }
 
     public ProductCategory getCategory() {
         return category;
@@ -39,5 +53,21 @@ public class ProductQueryParams {
 
     public void setSort(String sort) {
         this.sort = sort;
+    }
+
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+
+    public Integer getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Integer offset) {
+        this.offset = offset;
     }
 }
