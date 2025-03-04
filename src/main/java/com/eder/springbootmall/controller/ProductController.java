@@ -5,6 +5,7 @@ import com.eder.springbootmall.dto.ProductQueryParams;
 import com.eder.springbootmall.dto.ProductReq;
 import com.eder.springbootmall.model.Product;
 import com.eder.springbootmall.service.ProductService;
+import com.eder.springbootmall.util.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +27,7 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getProducts(
+    public ResponseEntity<Page<Product>> getProducts(
             @RequestParam(required = false) ProductCategory category,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "created_date") String orderBy,
@@ -41,7 +42,13 @@ public class ProductController {
         productQueryParams.setLimit(limit);
         productQueryParams.setOffset(offset);
 
-        return ResponseEntity.ok(productService.getProducts(productQueryParams));
+        Page<Product> page = new Page<>();
+        page.setLimit(limit);
+        page.setOffset(offset);
+        page.setTotal(productService.countProduct(productQueryParams));
+        page.setResults(productService.getProducts(productQueryParams));
+
+        return ResponseEntity.ok(page);
     }
 
 //    @GetMapping("/products")
