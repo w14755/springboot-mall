@@ -25,20 +25,12 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Integer countProduct(ProductQueryParams productQueryParams) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM product WHERE 1 = 1");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM product WHERE 1 = 1 ");
 
         Map<String, Object> parameterMap = new HashMap<>();
 
         // 查詢條件
-        if (productQueryParams.getCategory() != null) {
-            sql.append(" AND category = :category");
-            parameterMap.put("category", productQueryParams.getCategory().name());
-        }
-
-        if (productQueryParams.getSearch() != null) {
-            sql.append(" AND product_name LIKE :search");
-            parameterMap.put("search", "%" + productQueryParams.getSearch() + "%");
-        }
+        addFilteringSql(sql, parameterMap, productQueryParams);
 
         return namedParameterJdbcTemplate.queryForObject(sql.toString(), parameterMap, Integer.class);
     }
@@ -46,21 +38,12 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public List<Product> getProducts(ProductQueryParams productQueryParams) {
         StringBuilder sql = new StringBuilder(
-                "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date FROM product WHERE 1 = 1");
+                "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date FROM product WHERE 1 = 1 ");
 
         Map<String, Object> parameterMap = new HashMap<>();
 
         // 查詢條件
-        if (productQueryParams.getCategory() != null) {
-            // AND前需要加上空白，避免在組SQL的時候黏住
-            sql.append(" AND category = :category");
-            parameterMap.put("category", productQueryParams.getCategory().name());
-        }
-
-        if (productQueryParams.getSearch() != null) {
-            sql.append(" AND product_name LIKE :search");
-            parameterMap.put("search", "%" + productQueryParams.getSearch() + "%");
-        }
+        addFilteringSql(sql, parameterMap, productQueryParams);
 
         // 排序
         sql.append(" ORDER BY ").append(productQueryParams.getOrderBy()).append(" ").append(productQueryParams.getSort());
@@ -106,8 +89,6 @@ public class ProductDaoImpl implements ProductDao {
         return keyHolder.getKey().intValue();
     }
 
-    // Improved by standardizing variable names, removing debugging statements, and improving readability.
-
     @Override
     public void updateProduct(Integer productId, ProductReq req) {
         String sql = "UPDATE product  SET product_name = :productName, category = :category, image_url = :imageUrl, price = :price, stock = :stock, description = :description, last_modified_date =:lastModifiedDate " +
@@ -134,5 +115,22 @@ public class ProductDaoImpl implements ProductDao {
         map.put("productId", productId);
 
         namedParameterJdbcTemplate.update(sql, map);
+    }
+
+    private String addFilteringSql(StringBuilder sql, Map<String, Object> parameterMap, ProductQueryParams productQueryParams) {
+
+        if (productQueryParams.getCategory() != null) {
+            // AND前需要加上空白，避免在組SQL的時候黏住
+            sql.append(" AND category = :category");
+            parameterMap.put("category", productQueryParams.getCategory().name());
+        }
+
+        if (productQueryParams.getSearch() != null) {
+            sql.append(" AND product_name LIKE :search");
+            parameterMap.put("search", "%" + productQueryParams.getSearch() + "%");
+        }
+
+        System.out.println(sql.toString());
+        return sql.toString();
     }
 }
